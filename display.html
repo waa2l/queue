@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شاشة العرض - نظام إدارة الإنتظار</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .queue-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .queue-card:hover {
+            transform: scale(1.02);
+        }
+        .queue-card.active {
+            animation: pulse 1s infinite;
+            background: rgba(34, 197, 94, 0.9);
+            color: white;
+        }
+        .queue-card.paused {
+            opacity: 0.6;
+            background: rgba(156, 163, 175, 0.9);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .news-ticker {
+            animation: scroll-left 30s linear infinite;
+        }
+        @keyframes scroll-left {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .doctor-banner {
+            animation: slide-in-out 20s infinite;
+        }
+        @keyframes slide-in-out {
+            0%, 100% { transform: translateX(-100%); opacity: 0; }
+            10%, 90% { transform: translateX(0); opacity: 1; }
+        }
+        .notification-bar {
+            animation: slide-down 0.5s ease-out;
+        }
+        @keyframes slide-down {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .arabic-number {
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+        }
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+        .zoom-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .screen-selector {
+            position: fixed;
+            top: 20px;
+            right: 120px;
+            z-index: 1000;
+        }
+        .video-player {
+            aspect-ratio: 16/9;
+            background: #000;
+        }
+        .qr-code {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Control Buttons -->
+    <div class="fullscreen-btn">
+        <button id="fullscreenBtn" class="bg-black bg-opacity-50 text-white p-3 rounded-lg hover:bg-opacity-70 transition duration-300">
+            <i class="fas fa-expand"></i>
+        </button>
+    </div>
+
+    <div class="zoom-controls">
+        <button id="zoomIn" class="bg-black bg-opacity-50 text-white p-2 rounded-lg hover:bg-opacity-70 transition duration-300 mr-2">
+            <i class="fas fa-search-plus"></i>
+        </button>
+        <button id="zoomOut" class="bg-black bg-opacity-50 text-white p-2 rounded-lg hover:bg-opacity-70 transition duration-300">
+            <i class="fas fa-search-minus"></i>
+        </button>
+    </div>
+
+    <div class="screen-selector">
+        <select id="screenSelector" class="bg-black bg-opacity-50 text-white p-2 rounded-lg">
+            <option value="1">الشاشة ١</option>
+            <option value="2">الشاشة ٢</option>
+            <option value="3">الشاشة ٣</option>
+            <option value="4">الشاشة ٤</option>
+        </select>
+    </div>
+
+    <!-- Notification Bar -->
+    <div id="notificationBar" class="notification-bar hidden bg-red-600 text-white text-center py-3 font-bold text-lg">
+        <span id="notificationText"></span>
+        <span id="notificationTime" class="mr-4"></span>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white bg-opacity-90 backdrop-blur-sm shadow-lg py-4">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-hospital text-3xl text-blue-600 ml-3"></i>
+                    <h1 id="centerName" class="text-2xl font-bold text-gray-800">مركز طبي</h1>
+                </div>
+                <div class="text-left">
+                    <div id="currentTime" class="text-xl font-bold text-gray-800"></div>
+                    <div id="currentDate" class="text-sm text-gray-600"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8 flex-1">
+        <div class="grid grid-cols-12 gap-6 h-full">
+            <!-- Left Side - Video Player -->
+            <div class="col-span-8">
+                <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg p-4 h-full">
+                    <div class="video-player rounded-lg overflow-hidden relative">
+                        <video id="mainVideoPlayer" class="w-full h-full object-cover" controls>
+                            <source src="" type="video/mp4">
+                            المتصفح لا يدعم تشغيل الفيديو
+                        </video>
+                        <div id="videoControls" class="absolute bottom-4 left-4 right-4 flex justify-center space-x-2 space-x-reverse">
+                            <button id="prevVideo" class="bg-black bg-opacity-50 text-white p-2 rounded hover:bg-opacity-70">
+                                <i class="fas fa-backward"></i>
+                            </button>
+                            <button id="playPauseVideo" class="bg-black bg-opacity-50 text-white p-2 rounded hover:bg-opacity-70">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button id="nextVideo" class="bg-black bg-opacity-50 text-white p-2 rounded hover:bg-opacity-70">
+                                <i class="fas fa-forward"></i>
+                            </button>
+                            <button id="muteVideo" class="bg-black bg-opacity-50 text-white p-2 rounded hover:bg-opacity-70">
+                                <i class="fas fa-volume-up"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Video Playlist -->
+                    <div class="mt-4">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">قائمة التشغيل</h3>
+                        <div id="videoPlaylist" class="space-y-2 max-h-32 overflow-y-auto">
+                            <!-- Video items will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Queue Display -->
+            <div class="col-span-4">
+                <div class="bg-white bg-opacity-90 backdrop-blur-sm rounded-lg shadow-lg p-4 h-full">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">العيادات</h2>
+                    
+                    <div id="clinicsList" class="space-y-3 max-h-96 overflow-y-auto">
+                        <!-- Clinics will be loaded here -->
+                    </div>
+                    
+                    <!-- QR Code -->
+                    <div class="mt-6 text-center">
+                        <div class="qr-code inline-block">
+                            <canvas id="qrcode"></canvas>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">امسح QR Code لمتابعة دورك</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Doctor Promotion Banner -->
+    <div id="doctorBanner" class="doctor-banner fixed left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-90 backdrop-blur-sm rounded-r-lg shadow-lg p-4 max-w-sm">
+        <div class="text-center">
+            <img id="doctorImage" src="" alt="Doctor" class="w-20 h-20 rounded-full mx-auto mb-3 object-cover">
+            <h3 id="doctorName" class="font-bold text-gray-800"></h3>
+            <p id="doctorSpecialty" class="text-sm text-gray-600"></p>
+            <p id="doctorSchedule" class="text-xs text-gray-500 mt-2"></p>
+        </div>
+    </div>
+
+    <!-- News Ticker -->
+    <footer class="fixed bottom-0 left-0 right-0 bg-black bg-opacity-80 text-white py-3 overflow-hidden">
+        <div class="news-ticker whitespace-nowrap">
+            <span id="newsTickerText" class="text-lg font-semibold">أهلاً وسهلاً بكم في المركز الطبي - نسعى لتقديم أفضل خدمة لكم</span>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="display.js"></script>
+</body>
+</html>

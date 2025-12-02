@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الإنتظار - المركز الطبي</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .hero-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <i class="fas fa-hospital text-2xl text-blue-600 ml-3"></i>
+                    <h1 class="text-xl font-bold text-gray-800">نظام إدارة الإنتظار</h1>
+                </div>
+                <div class="hidden md:flex space-x-4 space-x-reverse">
+                    <a href="#home" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">الرئيسية</a>
+                    <a href="#features" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">المميزات</a>
+                    <a href="#services" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">الخدمات</a>
+                    <a href="about.html" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">عن النظام</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-bg text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6">مرحباً بكم في نظام إدارة الإنتظار</h1>
+                <p class="text-xl md:text-2xl mb-8 max-w-3xl mx-auto">نظام متكامل لإدارة طوابير المرضى والعملاء بطريقة ذكية وفعالة</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="client.html" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition duration-300">
+                        <i class="fas fa-qrcode ml-2"></i>الدخول كعميل
+                    </a>
+                    <a href="admin.html" class="bg-blue-800 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-900 transition duration-300">
+                        <i class="fas fa-cogs ml-2"></i>لوحة التحكم
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">مميزات النظام</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">نظام متكامل يوفر جميع الحلول اللازمة لإدارة طوابير العملاء والمرضى</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover border-r-4 border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-tv text-3xl text-blue-600 ml-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">شاشات عرض ذكية</h3>
+                    </div>
+                    <p class="text-gray-600">عرض الأرقام الحالية والنداءات الصوتية على شاشات متعددة مع إمكانية التحكم الكامل</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover border-r-4 border-green-500">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-mobile-alt text-3xl text-green-600 ml-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">الوصول عبر الجوال</h3>
+                    </div>
+                    <p class="text-gray-600">متابعة الدور من خلال الهاتف المحمول باستخدام QR Code دون الحاجة للبقاء أمام الشاشة</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover border-r-4 border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-calendar-alt text-3xl text-purple-600 ml-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">حجز المواعيد</h3>
+                    </div>
+                    <p class="text-gray-600">نظام حجز مواعيد متقدم يتيح للمرضى حجز مواعيدهم مسبقاً</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover border-r-4 border-red-500">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-volume-up text-3xl text-red-600 ml-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">نداء صوتي</h3>
+                    </div>
+                    <p class="text-gray-600">نطق الأرقام والعيادات باللغة العربية مع إمكانية تسجيل رسائل صوتية مخصصة</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover border-r-4 border-yellow-500">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-users text-3xl text-yellow-600 ml-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">إدارة الأطباء</h3>
+                    </div>
+                    <p class="text-gray-600">قاعدة بيانات شاملة للأطباء مع جداول العمل والتخصصات</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md card-hover border-r-4 border-indigo-500">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-chart-bar text-3xl text-indigo-600 ml-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-800">تقارير وإحصائيات</h3>
+                    </div>
+                    <p class="text-gray-600">تقارير مفصلة عن أداء العيادات وعدد المراجعين</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">الخدمات المتاحة</h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">جميع الخدمات التي يحتاجها المركز الطبي لإدارة الحشود والطوابير</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a href="display.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-desktop text-4xl text-blue-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">شاشة العرض</h3>
+                    <p class="text-gray-600 text-sm">عرض الأرقام الحالية والإعلانات</p>
+                </a>
+
+                <a href="control.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-gamepad text-4xl text-green-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">لوحة التحكم</h3>
+                    <p class="text-gray-600 text-sm">التحكم في أرقام العيادات</p>
+                </a>
+
+                <a href="client.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-mobile-alt text-4xl text-purple-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">صفحة العميل</h3>
+                    <p class="text-gray-600 text-sm">متابعة الدور عبر الجوال</p>
+                </a>
+
+                <a href="booking.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-calendar-check text-4xl text-red-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">حجز المواعيد</h3>
+                    <p class="text-gray-600 text-sm">حجز موعد مسبق</p>
+                </a>
+
+                <a href="doctors.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-user-md text-4xl text-yellow-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">الأطباء</h3>
+                    <p class="text-gray-600 text-sm">عرض وتعديل بيانات الأطباء</p>
+                </a>
+
+                <a href="print.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-print text-4xl text-indigo-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">الطباعة</h3>
+                    <p class="text-gray-600 text-sm">طباعة أرقام الانتظار</p>
+                </a>
+
+                <a href="consultation.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-comments text-4xl text-pink-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">الاستشارات</h3>
+                    <p class="text-gray-600 text-sm">الاستشارات والحجز</p>
+                </a>
+
+                <a href="admin.html" class="bg-white p-6 rounded-lg shadow-md card-hover text-center block">
+                    <i class="fas fa-cog text-4xl text-gray-600 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">الإدارة</h3>
+                    <p class="text-gray-600 text-sm">إعدادات النظام</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Queue Preview -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">معاينة الطابور الحالي</h2>
+                <p class="text-gray-600 text-lg">متابعة حية لحالة العيادات والأرقام الحالية</p>
+            </div>
+
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-8 rounded-lg shadow-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="queue-preview">
+                    <!-- Queue numbers will be loaded here -->
+                </div>
+                <div class="text-center mt-6">
+                    <a href="display.html" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                        <i class="fas fa-eye ml-2"></i>عرض الشاشة الكاملة
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center mb-4">
+                    <i class="fas fa-hospital text-2xl text-blue-400 ml-3"></i>
+                    <h3 class="text-xl font-bold">نظام إدارة الإنتظار</h3>
+                </div>
+                <p class="text-gray-400 mb-4">نظام متكامل لإدارة طوابير العملاء والمرضى</p>
+                <p class="text-gray-500 text-sm">© 2024 نظام إدارة الإنتظار. جميع الحقوق محفوظة.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        // Load current queue numbers
+        function loadQueuePreview() {
+            const previewContainer = document.getElementById('queue-preview');
+            
+            // Sample data - will be replaced with real Firebase data
+            const sampleClinics = [
+                { name: 'عيادة طب الأسرة', current: 15, status: 'active' },
+                { name: 'عيادة الباطنة', current: 23, status: 'active' },
+                { name: 'عيادة الأطفال', current: 8, status: 'paused' },
+                { name: 'عيادة الأسنان', current: 31, status: 'active' }
+            ];
+
+            previewContainer.innerHTML = sampleClinics.map(clinic => `
+                <div class="bg-white p-4 rounded-lg shadow-md text-center">
+                    <h4 class="font-semibold text-gray-800 mb-2">${clinic.name}</h4>
+                    <div class="text-3xl font-bold ${clinic.status === 'active' ? 'text-green-600 pulse-animation' : 'text-gray-400'}">
+                        ${toArabicNumber(clinic.current)}
+                    </div>
+                    <div class="text-sm text-gray-500 mt-1">
+                        ${clinic.status === 'active' ? 'نشطة' : 'متوقفة'}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQueuePreview();
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

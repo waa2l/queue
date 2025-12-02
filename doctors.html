@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأطباء - نظام إدارة الإنتظار</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .doctor-card {
+            transition: all 0.3s ease;
+        }
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-user-md text-2xl text-blue-600 ml-3"></i>
+                    <h1 class="text-xl font-bold text-gray-800">إدارة الأطباء</h1>
+                </div>
+                <div class="flex space-x-4 space-x-reverse">
+                    <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                        <i class="fas fa-home ml-2"></i>الرئيسية
+                    </a>
+                    <button id="addDoctorBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                        <i class="fas fa-plus ml-2"></i>إضافة طبيب
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Search and Filter -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">البحث</label>
+                    <input type="text" id="searchInput" placeholder="ابحث عن طبيب..." class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">التخصص</label>
+                    <select id="specialtyFilter" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">جميع التخصصات</option>
+                        <option value="طب أسرة">طب أسرة</option>
+                        <option value="باطنة">باطنة</option>
+                        <option value="أطفال">أطفال</option>
+                        <option value="نساء وتوليد">نساء وتوليد</option>
+                        <option value="جراحة">جراحة</option>
+                        <option value="أسنان">أسنان</option>
+                        <option value="جلدية">جلدية</option>
+                        <option value="أنف وأذن">أنف وأذن</option>
+                        <option value="عيون">عيون</option>
+                        <option value="قلب">قلب</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">حالة العمل</label>
+                    <select id="statusFilter" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">الكل</option>
+                        <option value="active">نشط</option>
+                        <option value="inactive">غير نشط</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button id="resetFilters" class="w-full bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
+                        <i class="fas fa-undo ml-2"></i>إعادة تعيين
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doctors Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="doctorsGrid">
+            <!-- Doctors will be loaded here -->
+        </div>
+
+        <!-- No Results -->
+        <div id="noResults" class="text-center py-12 hidden">
+            <i class="fas fa-user-md text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">لا يوجد أطباء</h3>
+            <p class="text-gray-500">لم يتم العثور على أطباء مطابقين لمعايير البحث</p>
+        </div>
+    </main>
+
+    <!-- Add/Edit Doctor Modal -->
+    <div id="doctorModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <h3 class="text-xl font-bold text-gray-800 mb-6">إضافة/تعديل طبيب</h3>
+            
+            <form id="doctorForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">الاسم الكامل *</label>
+                        <input type="text" id="doctorName" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">التخصص *</label>
+                        <select id="doctorSpecialty" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                            <option value="">-- اختر التخصص --</option>
+                            <option value="طب أسرة">طب أسرة</option>
+                            <option value="باطنة">باطنة</option>
+                            <option value="أطفال">أطفال</option>
+                            <option value="نساء وتوليد">نساء وتوليد</option>
+                            <option value="جراحة">جراحة</option>
+                            <option value="أسنان">أسنان</option>
+                            <option value="جلدية">جلدية</option>
+                            <option value="أنف وأذن">أنف وأذن</option>
+                            <option value="عيون">عيون</option>
+                            <option value="قلب">قلب</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">رقم الهاتف *</label>
+                        <input type="tel" id="doctorPhone" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2">البريد الإلكتروني</label>
+                        <input type="email" id="doctorEmail" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">رابط الصورة</label>
+                        <input type="url" id="doctorImage" placeholder="http://example.com/doctor.jpg" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">أيام العمل</label>
+                        <div class="grid grid-cols-7 gap-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" value="السبت" class="work-day mr-2"> السبت
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="الأحد" class="work-day mr-2"> الأحد
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="الاثنين" class="work-day mr-2"> الاثنين
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="الثلاثاء" class="work-day mr-2"> الثلاثاء
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="الأربعاء" class="work-day mr-2"> الأربعاء
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="الخميس" class="work-day mr-2"> الخميس
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" value="الجمعة" class="work-day mr-2"> الجمعة
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">معلومات إضافية</label>
+                        <textarea id="doctorNotes" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" placeholder="أي معلومات إضافية عن الطبيب..."></textarea>
+                    </div>
+                    
+                    <div class="md:col-span-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="doctorActive" class="mr-2" checked>
+                            <span class="text-gray-700">نشط</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-4 space-x-reverse mt-6">
+                    <button type="button" id="cancelDoctor" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        حفظ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Doctor Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4">
+            <div class="text-center mb-6">
+                <img id="detailDoctorImage" src="" alt="Doctor" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover">
+                <h3 id="detailDoctorName" class="text-xl font-bold text-gray-800"></h3>
+                <p id="detailDoctorSpecialty" class="text-gray-600"></p>
+            </div>
+            
+            <div class="space-y-4">
+                <div class="flex items-center">
+                    <i class="fas fa-phone text-blue-600 ml-3"></i>
+                    <span id="detailDoctorPhone" class="text-gray-800"></span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-envelope text-blue-600 ml-3"></i>
+                    <span id="detailDoctorEmail" class="text-gray-800"></span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-calendar text-blue-600 ml-3"></i>
+                    <span id="detailDoctorWorkDays" class="text-gray-800"></span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-info-circle text-blue-600 ml-3"></i>
+                    <span id="detailDoctorNotes" class="text-gray-800"></span>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-toggle-on text-blue-600 ml-3"></i>
+                    <span id="detailDoctorStatus" class="text-gray-800"></span>
+                </div>
+            </div>
+            
+            <div class="flex justify-center mt-6">
+                <button id="closeDetails" class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700">
+                    إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="doctors.js"></script>
+</body>
+</html>

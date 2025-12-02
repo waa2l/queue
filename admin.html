@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة الإدارة - نظام إدارة الإنتظار</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-right: 4px solid #3b82f6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .arabic-number {
+            font-family: 'Cairo', sans-serif;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal show">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <i class="fas fa-user-shield text-4xl text-blue-600 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800">تسجيل الدخول</h2>
+                <p class="text-gray-600">الرجاء إدخال بيانات الدخول للمتابعة</p>
+            </div>
+            
+            <form id="loginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">البريد الإلكتروني</label>
+                    <input type="email" id="email" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">كلمة المرور</label>
+                    <input type="password" id="password" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                    <i class="fas fa-sign-in-alt ml-2"></i>تسجيل الدخول
+                </button>
+            </form>
+            
+            <div id="loginError" class="mt-4 text-red-600 text-sm text-center hidden"></div>
+        </div>
+    </div>
+
+    <!-- Main Admin Interface -->
+    <div id="adminInterface" class="hidden">
+        <!-- Header -->
+        <header class="bg-white shadow-md">
+            <div class="flex items-center justify-between px-6 py-4">
+                <div class="flex items-center">
+                    <button id="sidebarToggle" class="md:hidden text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-xl font-bold text-gray-800 mr-4">لوحة الإدارة</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <span id="adminName" class="text-gray-700"></span>
+                    <button id="logoutBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300">
+                        <i class="fas fa-sign-out-alt ml-2"></i>تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="sidebar w-64 bg-white shadow-lg h-screen fixed right-0 transform translate-x-0 md:translate-x-0 transition-transform duration-300 ease-in-out">
+                <nav class="mt-8">
+                    <div class="nav-item active px-6 py-3 cursor-pointer" data-section="general">
+                        <i class="fas fa-cogs text-blue-600 ml-3"></i>
+                        <span class="text-gray-700">الإعدادات العامة</span>
+                    </div>
+                    
+                    <div class="nav-item px-6 py-3 cursor-pointer" data-section="screens">
+                        <i class="fas fa-desktop text-green-600 ml-3"></i>
+                        <span class="text-gray-700">إعدادات الشاشات</span>
+                    </div>
+                    
+                    <div class="nav-item px-6 py-3 cursor-pointer" data-section="clinics">
+                        <i class="fas fa-hospital text-purple-600 ml-3"></i>
+                        <span class="text-gray-700">إعدادات العيادات</span>
+                    </div>
+                    
+                    <div class="nav-item px-6 py-3 cursor-pointer" data-section="video">
+                        <i class="fas fa-video text-red-600 ml-3"></i>
+                        <span class="text-gray-700">مشغل الفيديو</span>
+                    </div>
+                    
+                    <div class="nav-item px-6 py-3 cursor-pointer" data-section="calls">
+                        <i class="fas fa-volume-up text-yellow-600 ml-3"></i>
+                        <span class="text-gray-700">النداء والتنبيهات</span>
+                    </div>
+                    
+                    <div class="nav-item px-6 py-3 cursor-pointer" data-section="doctors">
+                        <i class="fas fa-user-md text-indigo-600 ml-3"></i>
+                        <span class="text-gray-700">الأطباء</span>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 md:mr-64 p-6">
+                <!-- General Settings -->
+                <div id="general" class="content-section active">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">الإعدادات العامة</h2>
+                        
+                        <form id="generalSettingsForm">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">اسم المركز</label>
+                                    <input type="text" id="centerName" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">فترة عرض التنبيه (ثانية)</label>
+                                    <input type="number" id="alertDuration" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">سرعة نطق النداء</label>
+                                    <select id="speechSpeed" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                        <option value="0.5">بطيئة</option>
+                                        <option value="1" selected>عادية</option>
+                                        <option value="1.5">سريعة</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">مسار فولدر الصوتيات</label>
+                                    <input type="text" id="audioPath" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <label class="block text-gray-700 text-sm font-bold mb-2">محتوى شريط الأخبار</label>
+                                <textarea id="newsTicker" rows="3" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                                <i class="fas fa-save ml-2"></i>حفظ الإعدادات
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Screen Settings -->
+                <div id="screens" class="content-section">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">إعدادات الشاشات</h2>
+                            <button id="addScreenBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                                <i class="fas fa-plus ml-2"></i>إضافة شاشة
+                            </button>
+                        </div>
+                        
+                        <div id="screensList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Screens will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clinic Settings -->
+                <div id="clinics" class="content-section">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">إعدادات العيادات</h2>
+                            <button id="addClinicBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                                <i class="fas fa-plus ml-2"></i>إضافة عيادة
+                            </button>
+                        </div>
+                        
+                        <div id="clinicsList" class="space-y-4">
+                            <!-- Clinics will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Video Player Settings -->
+                <div id="video" class="content-section">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">إعدادات مشغل الفيديو</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-4">روابط الفيديوهات</h3>
+                                <div id="videoLinksList" class="space-y-2 mb-4">
+                                    <!-- Video links will be loaded here -->
+                                </div>
+                                <div class="flex">
+                                    <input type="url" id="newVideoLink" placeholder="أدخل رابط الفيديو" class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                    <button id="addVideoLink" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300 mr-2">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-4">أدوات التحكم</h3>
+                                <div class="space-y-2">
+                                    <button id="playVideo" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300">
+                                        <i class="fas fa-play ml-2"></i>تشغيل
+                                    </button>
+                                    <button id="pauseVideo" class="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition duration-300">
+                                        <i class="fas fa-pause ml-2"></i>إيقاف مؤقت
+                                    </button>
+                                    <button id="stopVideo" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">
+                                        <i class="fas fa-stop ml-2"></i>إيقاف
+                                    </button>
+                                    <button id="nextVideo" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                                        <i class="fas fa-forward ml-2"></i>التالي
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calls and Notifications -->
+                <div id="calls" class="content-section">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">النداء والتنبيهات</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-4">نداء فوري</h3>
+                                <div class="space-y-4">
+                                    <input type="number" id="callClientNumber" placeholder="رقم العميل" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                    <select id="callClinicNumber" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                                        <option value="">اختر العيادة</option>
+                                    </select>
+                                    <button id="callSpecificClient" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                                        <i class="fas fa-bullhorn ml-2"></i>نداء عميل محدد
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-4">تنبيهات الطوارئ</h3>
+                                <div class="space-y-2">
+                                    <button id="emergencyAlert" class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">
+                                        <i class="fas fa-exclamation-triangle ml-2"></i>تنبيه طوارئ
+                                    </button>
+                                    <button id="skipQueue" class="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 transition duration-300">
+                                        <i class="fas fa-fast-forward ml-2"></i>تخطي الطابور
+                                    </button>
+                                    <button id="resetAllClinics" class="w-full bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">
+                                        <i class="fas fa-redo ml-2"></i>تصفير جميع العيادات
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4">تسجيل صوتي</h3>
+                            <div class="flex items-center space-x-4 space-x-reverse">
+                                <button id="startRecording" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300">
+                                    <i class="fas fa-microphone ml-2"></i>تسجيل
+                                </button>
+                                <button id="stopRecording" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-300" disabled>
+                                    <i class="fas fa-stop ml-2"></i>إيقاف
+                                </button>
+                                <span id="recordingStatus" class="text-gray-600">جاهز للتسجيل</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctors Management -->
+                <div id="doctors" class="content-section">
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">إدارة الأطباء</h2>
+                            <button id="addDoctorBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition duration-300">
+                                <i class="fas fa-plus ml-2"></i>إضافة طبيب
+                            </button>
+                        </div>
+                        
+                        <div id="doctorsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Doctors will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modals -->
+    <div id="screenModal" class="modal">
+        <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">إضافة/تعديل شاشة</h3>
+            <form id="screenForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">رقم الشاشة</label>
+                    <input type="number" id="screenNumber" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">كلمة السر</label>
+                    <input type="password" id="screenPassword" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                <div class="flex justify-end space-x-2 space-x-reverse">
+                    <button type="button" id="cancelScreen" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition duration-300">إلغاء</button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>

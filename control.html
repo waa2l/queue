@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - نظام إدارة الإنتظار</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .control-button {
+            transition: all 0.3s ease;
+            min-height: 80px;
+            font-size: 1.1rem;
+        }
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .control-button:active {
+            transform: translateY(0);
+        }
+        .clinic-selector {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .current-number {
+            font-size: 4rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .arabic-number {
+            font-family: 'Cairo', sans-serif;
+        }
+        .notification {
+            animation: slideInRight 0.5s ease-out;
+        }
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .pulse-ring {
+            animation: pulse-ring 1.5s infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.2); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- Login Section -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-purple-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <i class="fas fa-gamepad text-4xl text-blue-600 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800">لوحة التحكم</h2>
+                <p class="text-gray-600">الرجاء اختيار العيادة وإدخال كلمة السر</p>
+            </div>
+            
+            <form id="controlLoginForm">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">اختر العيادة</label>
+                    <select id="clinicSelect" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                        <option value="">-- اختر العيادة --</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">كلمة السر</label>
+                    <input type="password" id="clinicPassword" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500" required>
+                </div>
+                
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                    <i class="fas fa-sign-in-alt ml-2"></i>الدخول
+                </button>
+            </form>
+            
+            <div id="loginError" class="mt-4 text-red-600 text-sm text-center hidden"></div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div id="controlPanel" class="hidden min-h-screen">
+        <!-- Header -->
+        <header class="bg-white shadow-lg">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-hospital text-2xl text-blue-600 ml-3"></i>
+                        <div>
+                            <h1 id="clinicName" class="text-xl font-bold text-gray-800">اسم العيادة</h1>
+                            <p class="text-sm text-gray-600">لوحة التحكم</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 space-x-reverse">
+                        <div class="text-center">
+                            <div id="currentTime" class="text-lg font-bold text-gray-800"></div>
+                            <div id="currentDate" class="text-sm text-gray-600"></div>
+                        </div>
+                        <button id="logoutBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition duration-300">
+                            <i class="fas fa-sign-out-alt ml-2"></i>خروج
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-6 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Current Number Display -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">الرقم الحالي</h2>
+                        <div id="currentNumber" class="current-number text-blue-600 arabic-number mb-4">٠</div>
+                        <div class="text-sm text-gray-600">آخر تحديث: <span id="lastUpdate">--</span></div>
+                        
+                        <!-- Call Status -->
+                        <div id="callStatus" class="mt-4 p-3 rounded-lg bg-green-100 text-green-800 hidden">
+                            <i class="fas fa-volume-up ml-2"></i>
+                            <span id="callStatusText">جاري النداء...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Control Buttons -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-6">أدوات التحكم</h2>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <!-- Navigation Buttons -->
+                            <button id="nextClient" class="control-button bg-blue-600 text-white p-4 rounded-lg hover:bg-blue-700">
+                                <i class="fas fa-arrow-right text-2xl mb-2 block"></i>
+                                العميل التالي
+                            </button>
+                            
+                            <button id="prevClient" class="control-button bg-gray-600 text-white p-4 rounded-lg hover:bg-gray-700">
+                                <i class="fas fa-arrow-left text-2xl mb-2 block"></i>
+                                العميل السابق
+                            </button>
+                            
+                            <button id="repeatCall" class="control-button bg-yellow-600 text-white p-4 rounded-lg hover:bg-yellow-700">
+                                <i class="fas fa-redo text-2xl mb-2 block"></i>
+                                تكرار النداء
+                            </button>
+
+                            <!-- Action Buttons -->
+                            <button id="callSpecific" class="control-button bg-green-600 text-white p-4 rounded-lg hover:bg-green-700">
+                                <i class="fas fa-bullhorn text-2xl mb-2 block"></i>
+                                نداء رقم محدد
+                            </button>
+                            
+                            <button id="callByName" class="control-button bg-purple-600 text-white p-4 rounded-lg hover:bg-purple-700">
+                                <i class="fas fa-user text-2xl mb-2 block"></i>
+                                نداء باسم
+                            </button>
+                            
+                            <button id="transferClient" class="control-button bg-indigo-600 text-white p-4 rounded-lg hover:bg-indigo-700">
+                                <i class="fas fa-exchange-alt text-2xl mb-2 block"></i>
+                                تحويل
+                            </button>
+
+                            <!-- Status Buttons -->
+                            <button id="pauseClinic" class="control-button bg-orange-600 text-white p-4 rounded-lg hover:bg-orange-700">
+                                <i class="fas fa-pause text-2xl mb-2 block"></i>
+                                إيقاف مؤقت
+                            </button>
+                            
+                            <button id="resumeClinic" class="control-button bg-green-600 text-white p-4 rounded-lg hover:bg-green-700 hidden">
+                                <i class="fas fa-play text-2xl mb-2 block"></i>
+                                استئناف
+                            </button>
+                            
+                            <button id="resetClinic" class="control-button bg-red-600 text-white p-4 rounded-lg hover:bg-red-700">
+                                <i class="fas fa-redo-alt text-2xl mb-2 block"></i>
+                                تصفير
+                            </button>
+
+                            <!-- Emergency Buttons -->
+                            <button id="emergencyAlert" class="control-button bg-red-800 text-white p-4 rounded-lg hover:bg-red-900">
+                                <i class="fas fa-exclamation-triangle text-2xl mb-2 block"></i>
+                                طوارئ
+                            </button>
+                            
+                            <button id="notifyDoctor" class="control-button bg-teal-600 text-white p-4 rounded-lg hover:bg-teal-700">
+                                <i class="fas fa-bell text-2xl mb-2 block"></i>
+                                تنبيه طبيب
+                            </button>
+                            
+                            <button id="skipQueue" class="control-button bg-pink-600 text-white p-4 rounded-lg hover:bg-pink-700">
+                                <i class="fas fa-fast-forward text-2xl mb-2 block"></i>
+                                تخطي
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="mt-8">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">إحصائيات اليوم</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="totalClients">0</div>
+                            <div class="text-sm text-gray-600">إجمالي العملاء</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600" id="avgWaitTime">0</div>
+                            <div class="text-sm text-gray-600">متوسط الانتظار (دقيقة)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-orange-600" id="currentWaitTime">0</div>
+                            <div class="text-sm text-gray-600">وقت الانتظار الحالي (دقيقة)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-purple-600" id="clinicStatus">نشطة</div>
+                            <div class="text-sm text-gray-600">حالة العيادة</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="callSpecificModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">نداء رقم محدد</h3>
+            <input type="number" id="specificNumber" placeholder="أدخل رقم العميل" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500 mb-4">
+            <div class="flex justify-end space-x-2 space-x-reverse">
+                <button id="cancelCallSpecific" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">إلغاء</button>
+                <button id="confirmCallSpecific" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">نداء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="callByNameModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">نداء باسم العميل</h3>
+            <input type="text" id="clientName" placeholder="أدخل اسم العميل" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500 mb-4">
+            <div class="flex justify-end space-x-2 space-x-reverse">
+                <button id="cancelCallByName" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">إلغاء</button>
+                <button id="confirmCallByName" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">نداء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="transferModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">تحويل عميل إلى عيادة أخرى</h3>
+            <div class="space-y-4">
+                <input type="number" id="transferNumber" placeholder="رقم العميل" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                <select id="targetClinic" class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                    <option value="">اختر العيادة المستهدفة</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-2 space-x-reverse mt-4">
+                <button id="cancelTransfer" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">إلغاء</button>
+                <button id="confirmTransfer" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">تحويل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="control.js"></script>
+</body>
+</html>
